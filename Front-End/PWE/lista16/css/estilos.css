@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+* {
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+    font-family: Oswald;
+}
+
+
+nav ul {
+    background-color: black;
+    text-align: right;
+}
+
+nav ul li {
+    display: inline-block;
+    
+}
+
+nav ul li a {
+    color: white;
+    display: inline-block;
+    padding: 20px 30px;
+    text-decoration: none;
+    transition: all 0.5s;
+    margin: -2px;
+}
+
+nav ul li a:hover {
+    background-color: white;
+    color: black;
+    padding-left: 40px;
+    background-size: 30px;
+    background-repeat: no-repeat;
+    background-position: left 4px center;
+}
+
+nav ul li a.html5:hover {
+    background-image: url(../img/html5.png);
+}
+
+nav ul li a.css3:hover {
+    background-image: url(../img/css3.png);
+}
+
+nav ul li a.javascript:hover {
+    background-image: url(../img/javascript.png);
+}
+
+.imagem-topo {
+    width: 100%;
+}
+
+.topo {
+    text-align: center;
+    margin: 20px;
+}
+
+section h1.titulo {
+    font-size: 40px;
+}
+
+section h2.sub-titulo {
+    color: red;
+    font-size: 20px;
+}
+
+section.informacao {
+    background-color: rgb(231, 230, 230);
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    margin: auto;
+    width: 1200px;
+}
+
+.secaoExplicativa div {
+    width: 33.33%;
+    text-align: center;
+    padding: 15px;
+}
+
+.secaoExplicativa div img {
+    width: 60px;
+}
+
+.secaoExplicativa div h2 {
+    color: green;
+}
+
+.imagem-texto {
+    padding: 20px 0px;
+}
+
+.divImagem {
+    width: 30%;
+}
+
+.divImagem img { 
+    width: 350px;
+}
+
+.divTexto p {
+    margin: 10px 0px;
+    text-align: justify;
+}
+
+footer p {
+    text-align: center;
+    background-color: black;
+    color: white;
+    padding: 40px;
+}

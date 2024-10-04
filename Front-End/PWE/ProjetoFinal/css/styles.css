@@ -1,0 +1,161 @@
+@font-face {
+    font-family: manga;
+    src: url(../fontes/animeace2_reg.ttf);
+}
+
+* {
+    font-family: manga;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* HEADER */
+
+/* NAVEGAÇÃO */
+nav ul {
+    background-color: black;
+    text-align: center;
+}
+
+nav ul li {
+    display: inline-block;
+}
+
+nav ul li a {
+    display: inline-block;
+    color: white;
+    text-decoration: none;
+    padding: 33px 25px;
+    margin: 0 -3px;
+    transition: all 0.5s;
+}
+
+nav ul li:nth-of-type(1) a:hover {
+    background-image: url(../img/balaoNormal.png);
+    background-repeat: no-repeat;
+    background-size: 120px;
+    background-position: center -15px;
+    color: black;
+}
+
+nav ul li:nth-of-type(2) a:hover {
+    background-image: url(../img/balaoPensa.png);
+    background-repeat: no-repeat;
+    background-size: 140px;
+    background-position: center center;
+    color: black;
+}
+
+nav ul li:nth-of-type(3) a:hover {
+    background-image: url(../img/balaoGrito.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
+    color: black;
+}
+
+/* MAIN */
+body {
+    background-image: url(../img/wallpaper.png);
+}
+
+p {
+    font-size: 20px;
+}
+
+section {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+section:nth-of-type(1) {
+    margin-top: 20px;
+}
+
+section  p {
+    text-align: left;
+    padding: 20px 0;
+}
+
+section > div {
+    display: flex;
+    width: 1200px;
+    margin: auto;
+    padding: 10px;
+    background-color: black;
+}
+
+section > div:nth-of-type(1) {
+    margin-bottom: 20px;
+}
+
+section > div:nth-of-type(1) > div {
+    padding: 0 10px;
+}
+
+section > div > div {
+    background-color: white;
+}
+
+section > div > div > h2 {
+    text-align: left;
+}
+
+/* IMAGENS DOS PAINEIS */
+.painel {
+    width: 100%;
+    border: 5px solid black;
+    transition: all .5s;
+}
+
+.painel:hover {
+    box-shadow: 7px 7px 10px black;
+}
+
+img {
+    margin-bottom: 20px;
+}
+
+
+/* ROMANCE */
+.romance > div:nth-of-type(2) > div {
+    width: 50%;
+    padding: 20px;
+}
+
+/* COMEDIA */
+.comedia > div:nth-of-type(2) > div {
+    width: 33.33%;
+    padding: 20px;
+}
+
+.comedia > div:nth-of-type(2) > div > p {
+    height: 375px;
+}
+
+/* ACAO */
+.acao > div:nth-of-type(2) > div {
+    width: 33.33%;
+    padding: 20px;
+}
+
+.acao > div:nth-of-type(2) > div > p {
+    height: 375px;
+}
+
+/* FOOTER */
+footer {
+    background-color: rgb(41, 40, 40);
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+footer p {
+    padding: 20px;
+}
+
+footer img {
+    width: 80px;
+}

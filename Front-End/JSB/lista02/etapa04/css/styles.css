@@ -1,0 +1,23 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+table {
+    text-align: center;
+    margin: auto;
+    border: 7px solid red;
+    border-radius: 10px;
+    background-color: wheat;
+    margin-top: 30px;
+}
+
+td {
+    padding: 10px;
+}
+
+p {
+    border-bottom: 4px solid black;
+    font-size: 35px;
+}

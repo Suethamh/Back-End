@@ -1,0 +1,164 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* HEADER */
+nav ul {
+    background-color: #FFD88E;
+    text-align: center;
+}
+
+nav ul li {
+    display: inline-block;
+}
+
+nav ul li a {
+    display: inline-block;
+    color: black;
+    padding: 20px;
+    text-decoration: none;
+    font-weight: bold;
+    border-top: 5px solid #FFD88E;
+}
+
+nav ul li a:hover {
+    border-top: 5px solid black;
+}
+
+/* MAIN */
+
+/* LOGIN */
+section {
+    padding: 50px;
+}
+
+section:nth-of-type(1) {
+    background-color: black;
+}
+
+section:nth-of-type(3) {
+    background-color: lightgray;
+}
+
+section > div {
+    width: 1200px;
+    margin: auto;
+    display: flex;
+}
+
+.login > div {
+    border: 10px solid #FFA400;
+    border-radius: 40px;
+    padding: 30px;
+    background-color: white;
+}
+
+.login > div > div {
+    width: 50%;
+    margin: 0 40px;
+}
+
+.login p {
+    padding: 20px 0;
+    text-align: justify;
+}
+
+.login button {
+    background-color: #FF5200;
+    color: white;
+    border: 0;
+    padding: 10px 40px;
+    border-radius: 10px;
+}
+
+.login button:hover {
+    background-color: #FFA300;
+    cursor: pointer;
+}
+
+/* PRODUTO */
+.produto > div {
+    flex-direction: column;
+    text-align: center;
+}
+
+.produto h2 {
+    color: #E95F19;
+    text-transform: uppercase;
+
+}
+
+.produto p {
+    padding: 30px;
+}
+
+/* PACOTES */
+.pacotes h2 {
+    text-align: center;
+    color: #E95F19;
+    text-transform: uppercase;
+}
+
+.pacotes > div > div{
+    padding: 40px;
+    text-align: justify;
+    width: 33.33%;
+}
+
+.pacotes p {
+    padding: 20px 0px;
+}
+
+/* MALA */
+.mala {
+    padding: 100px 0;
+}
+
+.mala details summary {
+    color: #E95F19;
+}
+
+.mala > div > div:nth-of-type(1) {
+    width: 30%;
+}
+
+.mala > div > div:nth-of-type(2) {
+    padding: 20px 60px;
+    text-align: justify;
+}
+
+.mala summary {
+    cursor: pointer;
+    padding: 20px 0;
+}
+
+/* VIDEOS */
+.videos {
+    background-color: #FCE8C8;
+}
+
+.videos h2 {
+    text-align: center;
+    color: #E95F19;
+}
+
+.videos > div {
+    padding: 0 50px;
+}
+
+.videos > div > div {
+    width: 50%;
+    text-align: center;
+    margin: 0 40px;
+}
+
+/* FOOTER */
+footer {
+    background-color: black;
+    color: white;
+    text-align: center;
+    padding: 30px;
+}

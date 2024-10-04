@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paginador XML</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        #record-list {
+            margin-bottom: 20px;
+        }
+
+        #record-details {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+        }
+
+        .record {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Paginador XML</h1>
+    <div id="record-list"></div>
+    <div id="record-details"></div>
+    <div id="pagination">
+        <button id="prev" onclick="prevPage()">Anterior</button>
+        <button id="next" onclick="nextPage()">Próximo</button>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const recordsPerPage = 5;
+        let records = [];
+        const xmlUrl = 'data.xml'; // O arquivo XML deve estar no mesmo diretório
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadXMLData();
+        });
+
+        function loadXMLData() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', xmlUrl, true);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    parseXML(xhr.responseXML);
+                }
+            };
+            xhr.send();
+        }
+
+        function parseXML(xml) {
+            records = Array.from(xml.getElementsByTagName('book')).map(book => {
+                return {
+                    author: book.getElementsByTagName('author')[0].textContent,
+                    title: book.getElementsByTagName('title')[0].textContent,
+                    genre: book.getElementsByTagName('genre')[0].textContent,
+                    price: book.getElementsByTagName('price')[0].textContent,
+                    publish_date: book.getElementsByTagName('publish_date')[0].textContent,
+                    description: book.getElementsByTagName('description')[0].textContent
+                };
+            });
+            displayRecords();
+        }
+
+        function displayRecords() {
+            const start = (currentPage - 1) * recordsPerPage;
+            const end = start + recordsPerPage;
+            const currentRecords = records.slice(start, end);
+
+            const recordList = document.getElementById('record-list');
+            recordList.innerHTML = '';
+
+            currentRecords.forEach((record, index) => {
+                const recordElement = document.createElement('div');
+                recordElement.className = 'record';
+                recordElement.innerHTML = `
+                    <h3>${record.title}</h3>
+                    <p><strong>Autor:</strong> ${record.author}</p>
+                    <p><strong>Gênero:</strong> ${record.genre}</p>
+                    <p><strong>Preço:</strong> ${record.price}</p>
+                    <button onclick="showDetails(${index})">Ver Detalhes</button>
+                `;
+                recordList.appendChild(recordElement);
+            });
+
+            document.getElementById('prev').disabled = currentPage === 1;
+            document.getElementById('next').disabled = end >= records.length;
+        }
+
+        function showDetails(index) {
+            const record = records[index];
+            const recordDetails = document.getElementById('record-details');
+            recordDetails.innerHTML = `
+                <h2>Detalhes do Livro</h2>
+                <p><strong>Título:</strong> ${record.title}</p>
+                <p><strong>Autor:</strong> ${record.author}</p>
+                <p><strong>Gênero:</strong> ${record.genre}</p>
+                <p><strong>Preço:</strong> ${record.price}</p>
+                <p><strong>Data de Publicação:</strong> ${record.publish_date}</p>
+                <p><strong>Descrição:</strong> ${record.description}</p>
+            `;
+        }
+
+        function nextPage() {
+            if ((currentPage * recordsPerPage) < records.length) {
+                currentPage++;
+                displayRecords();
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                displayRecords();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+        * {
+            padding: 0px;
+            margin: 0px;
+
+        }
+        ul {
+            background-color: black;
+            text-align: center;
+            width: 100%;
+            height: 80px;
+        }
+        ul li {
+            display: inline-block;
+            margin-left: -3px;
+        }
+        .menu {
+            font-family: 'Roboto';
+            width: 100px;
+            color: white;
+            background-repeat: no-repeat;
+            background-position: center 10px;
+            text-align: center;
+            filter: saturate(0);
+            cursor: pointer;
+            transition: 0.5s;
+        }
+        .menu a {
+            color: white;
+            display: block;
+            padding: 45px 15px 10px 15px;
+            text-decoration: none;
+            transition: 0.5s;
+        }
+        .face {
+            background-image: url('/24-08-02/imagens/face.png');
+            transition: 0.5s;
+        }
+        .face:hover {
+            filter: saturate(100%);
+            border-bottom: 5px solid #3B5998;
+            transition: 0.5s;
+        }
+        .face:hover a {
+            color: #3B5998;
+            transition: 0.5s;
+        }
+        .insta {
+            background-image: url('/24-08-02/imagens/insta.png');
+            transition: 0.5s;
+        }
+        .insta:hover {
+            filter: saturate(100%);
+            border-bottom: 5px solid magenta;
+            transition: 0.5s;
+        }
+        .insta:hover a {
+            color: magenta;
+            transition: 0.5s;
+        }
+        .maps {
+            background-image: url('/24-08-02/imagens/maps.png');
+        }
+        .maps:hover {
+            filter: saturate(100%);
+            border-bottom: 5px solid #1081E0;
+            transition: 0.5s;
+        }
+        .maps:hover a {
+            color: #1081E0;
+            transition: 0.5s;
+        }
+        .twitter {
+            background-image: url('/24-08-02/imagens/twitter.png');
+        }
+        .twitter:hover {
+            filter: saturate(100%);
+            border-bottom: 5px solid #55ACEE;
+            transition: 0.5s;
+        }
+        .twitter:hover a {
+            color: #55ACEE;
+            transition: 0.5s;
+        }
+        .youtube {
+            background-image: url('/24-08-02/imagens/youtube.png');
+        }
+        .youtube:hover {
+            filter: saturate(100%);
+            border-bottom: 5px solid #F61C0D;
+            transition: 0.5s;
+        }
+        .youtube:hover a {
+            color: #F61C0D;
+            transition: 0.5s;
+        }

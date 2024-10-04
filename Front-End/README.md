@@ -1,0 +1,5 @@
+Nesse projeto, é desenvolvido os trabalhos e listas do professor Wilton Filho, esses projetos são da disciplina Projeto Website Estático, que busca ensinar HTML e CSS para os alunos.
+
+Além disso, no projeto é possível encontrar as listas de atividades e, na pasta "aulas" algumas dos sites desenvolvidos aulas enviadas para o repositório durante o semestre.
+
+Para acessar qualquer site desenvolvido basta colocar o link no ser navegador: "https://suethamh.github.io/PWE/" seguido pela pasta que deseja acessar, por exemplo: "https://suethamh.github.io/PWE/lista07" para acessar a lista 07, para acessar conteúdos que estão dentro de outras pasta é necessário colocar essa pasta também no no link de acesso, por exemplo, para acessar a aula dio dia 30/08/24 basta colocar no link essa sequência de pastas, "https://suethamh.github.io/PWE/aulas/24-08-30"

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2>Ajax</h2>
+    <p id="demo"></p>
+    <script>f
+        const xhttp = new XMLHttpRequest ();
+        xhttp.onload = function() {
+            const xmlDoc = this.responseXML;
+            const x = xmlDoc.getElementsByTagName("ARTISTA");
+            let txt = "";
+            for (let i = 0; i < x.length; i++) {
+                txt = txt + x[i].childNodes[0].nodeValue + "<br>"
+            }
+            document.getElementById("demo").innerHTML = txt;
+        }
+xhttp.open("GET", "catalogo.xml");
+xhttp.send();
+            </script>
+</body>
+</html>
