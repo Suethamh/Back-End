@@ -28,6 +28,9 @@ if (mulher.length > homem.length) {
     menor = mulher.length;
 }
 
+homem.sort();
+mulher.sort();
+
 document.write(`<table>`);
 
 for (var i = 0; i < maior; i++) {
