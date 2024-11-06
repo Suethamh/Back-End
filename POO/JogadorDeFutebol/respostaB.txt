@@ -1,0 +1,1 @@
+B)O App.java não consegue acessar a variável jogador.nome e o código não funciona.
