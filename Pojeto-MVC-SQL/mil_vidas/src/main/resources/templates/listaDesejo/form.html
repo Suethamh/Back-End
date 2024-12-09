@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${listaDesejo.cod_wl != 0 ? 'Editar Lista de Desejos' : 'Nova Lista de Desejos'}">Formulário de Lista de Desejos</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div class="container">
+        <h1 th:text="${listaDesejo.cod_wl != 0 ? 'Editar Lista de Desejos' : 'Nova Lista de Desejos'}">Formulário de Lista de Desejos</h1>
+
+        <form th:action="@{${listaDesejo.cod_wl != 0 ? '/listaDesejo/editarListaDesejo/' + listaDesejo.cod_wl : '/listaDesejo/novaListaDesejo'}}" th:object="${listaDesejo}" method="post">
+            <div>
+                <label for="cod_wl">Código:</label>
+                <input type="text" th:field="*{cod_wl}" id="cod_wl" placeholder="Digite o código" required readonly="true" th:readonly="${listaDesejo.cod_wl != 0}">
+            </div>
+
+            <div>
+                <label for="livro">Livro:</label>
+                <input type="text" th:field="*{livro.titulo}" id="livro" placeholder="Digite o título do livro" required>
+            </div>
+
+            <div>
+                <label for="cliente">Cliente:</label>
+                <input type="text" th:field="*{cliente.nome}" id="cliente" placeholder="Digite o nome do cliente" required>
+            </div>
+
+            <div>
+                <label for="data_inclusao">Data de Inclusão:</label>
+                <input type="date" th:field="*{data_inclusao}" id="data_inclusao" required>
+            </div>
+
+            <button type="submit" th:text="${listaDesejo.cod_wl != 0 ? 'Atualizar' : 'Salvar'}">Salvar</button>
+        </form>
+
+        <a th:href="@{/listaDesejo}" class="btn">Voltar à Lista de Desejos</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <title>Lista de Clientes</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Lista de Clientes</h1>
+
+        <div th:if="${mensagem}" class="mensagem-servidor">
+            <p th:text="${mensagem}"></p>
+        </div>
+
+        <div class="actions">
+            <a href="#" th:href="@{/cliente/novoCliente}" class="btn">Adicionar novo cliente</a>
+
+            <form th:action="@{/cliente/buscarClientes}" method="get" class="search-form">
+                <input type="text" name="nome" placeholder="Buscar por nome" required>
+                <button type="submit" class="btn">Buscar</button>
+            </form>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Login</th>
+                    <th>Senha</th>
+                    <th>Nome</th>
+                    <th>Nickname</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="cliente : ${clientes}">
+                    <td th:text="${cliente.login}">Login</td>
+                    <td th:text="${cliente.senha}">Senha</td>
+                    <td th:text="${cliente.nome}">Nome</td>
+                    <td th:text="${cliente.nickname}">Nickname</td>
+                    <td>
+                        <a th:href="@{/cliente/editarCliente/{login}(login=${cliente.login})}" class="btn btn-edit">Editar</a>
+
+                        <form th:action="@{/cliente/excluirCliente/{login}(login=${cliente.login})}" method="post"
+                        th:onsubmit="return confirm('Tem certeza que deseja excluir?');" style="display: inline;">
+                        <button type="submit" class="btn btn-delete">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

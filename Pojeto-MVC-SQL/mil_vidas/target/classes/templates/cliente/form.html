@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${cliente.login != null ? 'Editar Cliente' : 'Novo Cliente'}">Formulário de Cliente</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div class="container">
+        <h1 th:text="${cliente.login != null ? 'Editar Cliente' : 'Novo Cliente'}">Formulário de Cliente</h1>
+
+        <form th:action="@{${cliente.login != null ? '/cliente/editarCliente/' + cliente.login : '/cliente/novoCliente/'}}" th:object="${cliente}" method="post">
+            <div>
+                <label for="login">Login:</label>
+                <input type="text" th:field="*{login}" id="login" placeholder="Digite o login" required th:reandoly="${cliente.login != null}">
+            </div>
+            
+            <div>
+                <label for="senha">Senha:</label>
+                <input type="password" th:field="*{senha}" id="senha" placeholder="Digite a senha" required>
+            </div>
+
+            <div>
+                <label for="Nome">Nome:</label>
+                <input type="text" th:field="*{nome}" id="Nome" placeholder="Digite o Nome" required>
+            </div>
+            <div>
+                <label for="Nickname">Nickname:</label>
+                <input type="text" th:field="*{nickname}" id="Nickname" placeholder="Digite o Nickname" required>
+            </div>
+
+            <button type="submit" th:text="${cliente.login != null ? 'Atualizar' : 'Salvar'}">Salvar</button>
+        </form>
+
+        <a th:href="@{/cliente}" class="btn">Voltar a lista de clientes</a>
+    </div>
+</body>
+</html>

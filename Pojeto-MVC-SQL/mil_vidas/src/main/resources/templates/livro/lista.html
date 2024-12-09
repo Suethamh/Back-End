@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <title>Lista de livros</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Lista de livros</h1>
+
+        <div th:if="${mensagem}" class="mensagem-servidor">
+            <p th:text="${mensagem}"></p>
+        </div>
+
+        <div class="actions">
+            <a href="#" th:href="@{/livro/novoLivro}" class="btn">Adicionar novo livro</a>
+
+            <form th:action="@{/livro/buscarLivros}" method="get" class="search-form">
+                <input type="text" name="titulo" placeholder="Buscar por titulo" required>
+                <button type="submit" class="btn">Buscar</button>
+            </form>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>codigo</th>
+                    <th>titulo</th>
+                    <th>escritor</th>
+                    <th>editora</th>
+                    <th>genero</th>
+                    <th>numero de páginas</th>
+                    <th>avaliacao</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="livro : ${livros}">
+                    <td th:text="${livro.cod_livro}">cod_livro</td>
+                    <td th:text="${livro.titulo}">titulo</td>
+                    <td th:text="${livro.escritor}">escritor</td>
+                    <td th:text="${livro.editora}">editora</td>
+                    <td th:text="${livro.genero}">genero</td>
+                    <td th:text="${livro.num_paginas}">num_paginas</td>
+                    <td th:text="${livro.avaliacao}">avaliacao</td>
+                    <td>
+                        <a th:href="@{/livro/editarlivro/{cod_livro}(cod_livro=${livro.cod_livro})}" class="btn btn-edit">Editar</a>
+
+                        <form th:action="@{/livro/excluirlivro/{cod_livro}(cod_livro=${livro.cod_livro})}" method="post"
+                        th:onsubmit="return confirm('Tem certeza que deseja excluir?');" style="display: inline;">
+                        <button type="submit" class="btn btn-delete">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

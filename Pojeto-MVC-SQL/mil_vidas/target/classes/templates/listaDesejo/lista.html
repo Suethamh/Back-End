@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <title>Lista de Desejos</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Lista de Desejos</h1>
+
+        <div th:if="${mensagem}" class="mensagem-servidor">
+            <p th:text="${mensagem}"></p>
+        </div>
+
+        <div class="actions">
+            <a th:href="@{/listaDesejo/novaListaDesejo}" class="btn">Adicionar Nova Lista de Desejos</a>
+
+            <form th:action="@{/listaDesejo/buscarPorCliente}" method="get" class="search-form">
+                <input type="text" name="clienteNome" placeholder="Buscar por cliente" required>
+                <button type="submit" class="btn">Buscar</button>
+            </form>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Livro</th>
+                    <th>Cliente</th>
+                    <th>Data de Inclusão</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="listaDesejo : ${listaDesejos}">
+                    <td th:text="${listaDesejo.cod_wl}">código</td>
+                    <td th:text="${listaDesejo.livro.titulo}">livro</td>
+                    <td th:text="${listaDesejo.cliente.nome}">cliente</td>
+                    <td th:text="${listaDesejo.data_inclusao}">data_inclusao</td>    
+                    <td>
+                        <a th:href="@{/listaDesejo/editarListaDesejo/{cod_wl}(cod_wl=${listaDesejo.cod_wl})}" class="btn btn-edit">Editar</a>
+
+                        <form th:action="@{/listaDesejo/excluirListaDesejo/{cod_wl}(cod_wl=${listaDesejo.cod_wl})}" method="post"
+                        th:onsubmit="return confirm('Tem certeza que deseja excluir?');" style="display: inline;">
+                        <button type="submit" class="btn btn-delete">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

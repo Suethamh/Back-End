@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${livro.cod_livro != 0 ? 'Editar livro' : 'Novo livro'}">Formulário de livro</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div class="container">
+        <h1 th:text="${livro.cod_livro != 0 ? 'Editar livro' : 'Novo livro'}">Formulário de livro</h1>
+
+        <form th:action="@{${livro.cod_livro != 0 ? '/livro/editarlivro/' + livro.cod_livro : '/livro/novolivro'}}" th:object="${livro}" method="post">
+            <div>
+                <label for="cod_livro">cod_livro:</label>
+                <input type="text" th:field="*{cod_livro}" id="cod_livro" placeholder="Digite o cod_livro" required th:reandoly="${livro.cod_livro != null}">
+            </div>
+            
+            <div>
+                <label for="titulo">titulo:</label>
+                <input type="text" th:field="*{titulo}" id="titulo" placeholder="Digite o titulo" required>
+            </div>
+            
+            <div>
+                <label for="escritor">escritor:</label>
+                <input type="text" th:field="*{escritor}" id="escritor" placeholder="Digite o escritor" required>
+            </div>
+            
+            <div>
+                <label for="editora">editora:</label>
+                <input type="text" th:field="*{editora}" id="editora" placeholder="Digite o editora" required>
+            </div>
+            
+            <div>
+                <label for="genero">genero:</label>
+                <input type="text" th:field="*{genero}" id="genero" placeholder="Digite o genero" required>
+            </div>
+            
+            <div>
+                <label for="num_paginas">num_paginas:</label>
+                <input type="text" th:field="*{num_paginas}" id="num_paginas" placeholder="Digite o num_paginas" required>
+            </div>
+            
+            <div>
+                <label for="avaliacao">avaliacao:</label>
+                <input type="text" th:field="*{avaliacao}" id="avaliacao" placeholder="Digite o avaliacao" required>
+            </div>
+            
+            <button type="submit" th:text="${livro.cod_livro != 0 ? 'Atualizar' : 'Salvar'}">Salvar</button>
+        </form>
+
+        <a th:href="@{/livro}" class="btn">Voltar a lista de livros</a>
+    </div>
+</body>
+</html>
