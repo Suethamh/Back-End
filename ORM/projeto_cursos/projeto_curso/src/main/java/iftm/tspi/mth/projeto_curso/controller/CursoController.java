@@ -1,27 +1,25 @@
 package iftm.tspi.mth.projeto_curso.controller;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import iftm.tspi.mth.projeto_curso.domain.Curso;
+import iftm.tspi.mth.projeto_curso.dto.AlunoDTO;
 import iftm.tspi.mth.projeto_curso.dto.CursoDTO;
-import iftm.tspi.mth.projeto_curso.dto.ErroDTO;
-import jakarta.websocket.server.PathParam;
+import iftm.tspi.mth.projeto_curso.exception.ConflitoDeDadosException;
+import iftm.tspi.mth.projeto_curso.exception.RecursoNaoEncontradoException;
+import iftm.tspi.mth.projeto_curso.exception.RequesicaoInvalidaException;
 
 @RestController
 @RequestMapping("/cursos")
@@ -39,18 +37,10 @@ public class CursoController {
         boolean existe = cursos.stream().anyMatch(curso -> curso.getSigla().equals(novoCurso.getSigla()));
         
         if(existe) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(ErroDTO.builder()
-            .mensagem("Já existe um curso com essa sigla!!")
-            .data(LocalDateTime.now())
-            .build());
+            throw new ConflitoDeDadosException("Já existe um curso com essa sigla");
         }
         if(novoCurso.getNome().equals("") || novoCurso.getSigla().equals("")){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                ErroDTO.builder()
-                .mensagem("Nome ou sigla não informados!!")
-                .data(LocalDateTime.now())
-                .build()
-            );
+            throw new RequesicaoInvalidaException("Nome ou sigla não informada");
         }
 
         cursos.add(novoCurso);
@@ -72,7 +62,7 @@ public class CursoController {
     }
 
     @PutMapping("/{sigla}")
-    public ResponseEntity<?> atualizarCurso(@PathVariable String sigla @RequestBody Curso cursoAtualizado){
+    public ResponseEntity<?> atualizarCurso(@PathVariable String sigla, @RequestBody Curso cursoAtualizado){
         for(CursoDTO curso : cursos){
             if(curso.getSigla().equalsIgnoreCase(sigla)){
                 curso.setNome(cursoAtualizado.getNome());
@@ -80,5 +70,31 @@ public class CursoController {
                 return ResponseEntity.ok(cursoAtualizado);
             }
         }
+
+        throw new RecursoNaoEncontradoException("Curso não encontrado");
     }
+
+    @DeleteMapping("/{sigla}")
+    public ResponseEntity<?> excluirCurso(@PathVariable String sigla){
+        boolean vazio = cursos.isEmpty();
+        
+
+        if(!vazio){
+            boolean removido = cursos.removeIf(curso -> curso.getSigla().equals(sigla));
+            if(removido){
+                return ResponseEntity.noContent().build();
+            }
+        }else{
+            throw new ConflitoDeDadosException("Existem alunos nesse curso. Não é possivel excluir.");
+        }
+
+        throw new RecursoNaoEncontradoException("Curso não encontrado");
+    }
+
+    @GetMapping("/{sigla}/alunos")
+    public ResponseEntity<?> alunosPorCurso(@PathVariable String sigla) {
+        List<AlunoDTO> alunos = new ArrayList<>();
+        return ResponseEntity.ok(alunos);
+    }
+    
 }

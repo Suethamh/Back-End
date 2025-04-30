@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-MatematicaApplication<matematica>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "iftm.tspi.mth.matematica.MatematicaApplication",
+            "projectName": "matematica",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

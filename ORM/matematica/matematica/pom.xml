@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>iftm.tspi.mth</groupId>
-	<artifactId>projeto_curso</artifactId>
+	<artifactId>matematica</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>projeto_curso</name>
+	<name>matematica</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>

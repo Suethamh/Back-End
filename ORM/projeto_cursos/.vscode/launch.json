@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-ProjetoCursoApplication<projeto_curso>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "iftm.tspi.mth.projeto_curso.ProjetoCursoApplication",
+            "projectName": "projeto_curso",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
