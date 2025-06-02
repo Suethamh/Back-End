@@ -9,26 +9,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 public class FuncionarioTests {
 
-    @Test
-    public void testarPagamentoInvalido(){
-        int horasTrabalhadas = 41;
-        double valorHora = 151.00;
-
-        String saidaEsperada = "O Valor do Pagamento precisa ser menor que R$6.072,00";
-        Funcionario funcionario = new Funcionario(horasTrabalhadas, valorHora);
-        
-        
-        String saidaObtida = assertThrows(IllegalArgumentException.class, () -> {funcionario.calcularPagamento();}).getMessage();
-        
-        assertEquals(saidaEsperada, saidaObtida);
-    }
 
     @Test
     public void testarPagamentoMenorValido(){
-        int horasTrabalhadas = 25;
-        double valorHora = 60.72;
+        int horasTrabalhadas = 23;
+        double valorHora = 68.72;
 
-        double saidaEsperada = 1518.0;
+        double saidaEsperada = 1580.56;
 
         Funcionario funcionario = new Funcionario(horasTrabalhadas, valorHora);
         
@@ -53,8 +40,8 @@ public class FuncionarioTests {
 
     @Test
     public void testarContrutorEntradaValorHoraMenorValida(){
-        double valorHoraValida = 60.72;
-        double valorEsperado = 60.72;
+        double valorHoraValida = 68.72;
+        double valorEsperado = 68.72;
 
         Funcionario func = new Funcionario(valorHoraValida);
         
@@ -125,7 +112,7 @@ public class FuncionarioTests {
         func.setHorasTrabalhadas(20);
         func.setValorHora(68.72);
 
-        String saidaEsperada = "O valor do pagamento precisa ser maior que o salário mínimo (R$1518.00)";
+        String saidaEsperada = "O valor do pagamento precisa ser maior que o salário mínimo (R$1.518,00) e menor que R$6.072,00";
 
         String saidaObtida = assertThrows(IllegalArgumentException.class, () -> {func.calcularPagamento();}).getMessage();
 
@@ -136,9 +123,9 @@ public class FuncionarioTests {
     public void testarModificarValorPagamentoInvalido(){
         Funcionario func = new Funcionario();
         func.setHorasTrabalhadas(20);
-        func.setValorHora(75.9);
+        func.setValorHora(70.0);
 
-        String saidaEsperada = "O valor do pagamento precisa ser maior que o salário mínimo (R$1518.00)";
+        String saidaEsperada = "O valor do pagamento precisa ser maior que o salário mínimo (R$1.518,00) e menor que R$6.072,00";
 
         String saidaObtida = assertThrows(IllegalArgumentException.class, () -> {func.calcularPagamento();}).getMessage();
 

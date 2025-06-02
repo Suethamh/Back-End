@@ -1,6 +1,7 @@
 package iftm.tspi.mth.projeto_funcionarios;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,8 +13,9 @@ public class FuncionarioTercerizadoTest {
         Double despesasAdicionaisInvalido = 10101010.10;
         String msgEsperada = "O valor para a despesas adicionais foi inválido. O valor tem que ser entre 0 e 1000.";
 
-        FuncionarioTercerizado t1 = new FuncionarioTercerizado(despesasAdicionaisInvalido);
-        Double saidaObtida = t1.getdespesasAdicionais();
+        String saidaObtida = assertThrows(IllegalArgumentException.class, () -> {
+            FuncionarioTercerizado t1 = new FuncionarioTercerizado(despesasAdicionaisInvalido);
+        }).getMessage();
 
         assertEquals(saidaObtida, msgEsperada);
     }
@@ -24,7 +26,7 @@ public class FuncionarioTercerizadoTest {
         Double saidaEsperada = despesasAdicionaisValido;
 
         FuncionarioTercerizado t1 = new FuncionarioTercerizado(despesasAdicionaisValido);
-        Double saidaObtida = t1.getdespesasAdicionais();
+        Double saidaObtida = t1.getDespesasAdicionais();
 
         assertEquals(saidaObtida, saidaEsperada);
     }
@@ -35,7 +37,7 @@ public class FuncionarioTercerizadoTest {
         Double saidaEsperada = despesasAdicionaisValido;
 
         FuncionarioTercerizado t1 = new FuncionarioTercerizado(despesasAdicionaisValido);
-        Double saidaObtida = t1.getdespesasAdicionais();
+        Double saidaObtida = t1.getDespesasAdicionais();
 
         assertEquals(saidaObtida, saidaEsperada);
     }
@@ -44,7 +46,7 @@ public class FuncionarioTercerizadoTest {
     public void testarConstrutorEntradasValidas() {
         String nomeEsperado = "John Doe";
         Integer horasTrabalhadasEsperado = 20;    
-        Double valorHoraEsperado = 14.5;    
+        Double valorHoraEsperado = 75.9;    
         Double despesasAdicionaisEsperado = 999.99;
 
         FuncionarioTercerizado saidaObtida = new FuncionarioTercerizado(nomeEsperado, horasTrabalhadasEsperado, valorHoraEsperado, despesasAdicionaisEsperado);
@@ -52,29 +54,31 @@ public class FuncionarioTercerizadoTest {
         assertEquals(nomeEsperado, saidaObtida.getNome(), "Nome não corresponde");
         assertEquals(horasTrabalhadasEsperado, saidaObtida.getHorasTrabalhadas(), "Horas trabalhadas não corresponde");
         assertEquals(valorHoraEsperado, saidaObtida.getValorHora(), "Valor hora não corresponde");
-        assertEquals(despesasAdicionaisEsperado, saidaObtida.getdespesasAdicionais(), "Despesas adicionais não corresponde");
+        assertEquals(despesasAdicionaisEsperado, saidaObtida.getDespesasAdicionais(), "Despesas adicionais não corresponde");
     }
 
     @Test
-    public void testarFuncionarioTercerizadoModificardespesasAdicionaisEntradaValida() {
+    public void testarFuncionarioTercerizadoModificarDespesasAdicionaisEntradaValida() {
         Double despesasAdicionaisValido = 1.00;
         Double despesasAdicionaisOriginal = 10.00;
         Double saidaEsperada = despesasAdicionaisValido;
 
         FuncionarioTercerizado saidaObtida = new FuncionarioTercerizado(despesasAdicionaisOriginal);
-        saidaObtida.setdespesasAdicionais(despesasAdicionaisValido);
+        saidaObtida.setDespesasAdicionais(despesasAdicionaisValido);
 
-        assertEquals(saidaObtida.getdespesasAdicionais(), saidaEsperada);
+        assertEquals(saidaObtida.getDespesasAdicionais(), saidaEsperada);
     }
     @Test
-    public void testarFuncionarioTercerizadoModificardespesasAdicionaisEntradaInvalida() {
+    public void testarFuncionarioTercerizadoModificarDespesasAdicionaisEntradaInvalida() {
         Double despesasAdicionaisInvalido = 1000.01;
         Double despesasAdicionaisOriginal = 10.00;
         String msgEsperada = "O valor para a despesas adicionais foi inválido. O valor tem que ser entre 0 e 1000.";
 
-        FuncionarioTercerizado saidaObtida = new FuncionarioTercerizado(despesasAdicionaisOriginal);
-        saidaObtida.setdespesasAdicionais(despesasAdicionaisInvalido);
+        FuncionarioTercerizado f1 = new FuncionarioTercerizado(despesasAdicionaisOriginal);
+        String saidaObtida = assertThrows(IllegalArgumentException.class, () -> {
+            f1.setDespesasAdicionais(despesasAdicionaisInvalido);
+        }).getMessage();
 
-        assertEquals(saidaObtida.getdespesasAdicionais(), msgEsperada);
+        assertEquals(saidaObtida, msgEsperada);
     }
 }
