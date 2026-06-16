@@ -65,7 +65,7 @@ links.drop_duplicates(subset=["movieId"], inplace=True)
 print("\nAnálise de outliers (avaliações):")
 print(avaliacoes["rating"].describe())
 fora_intervalo = avaliacoes[(avaliacoes["rating"] < 0.5) | (avaliacoes["rating"] > 5)]
-print(f"\nQuantidade de avaliações fora do intervalo esperado: {len(fora_intervalo)}")
+print(f"\nQtd de avaliações por filme fora do intervalo esperado: {len(fora_intervalo)}")
 
 notas_filme = avaliacoes.groupby("movieId").size()
 print(notas_filme.describe())
@@ -125,17 +125,24 @@ print(top_qualidade[["title", "media_avaliacao", "qtd_avaliacoes"]])
 # Análise inicial dos clusters.
 # Identificação de problemas no agrupamento inicial.
 
+
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
-from sklearn.metrics import silhouette_score
+from sklearn.metrics import davies_bouldin_score
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
+# ============================================================================
+# SELEÇÃO DE ATRIBUTOS PARA AGRUPAMENTO
+# ============================================================================
+print("\n" + "="*70)
+print("ATRIBUTOS SELECIONADOS PARA AGRUPAMENTO DE USUÁRIOS")
+print("="*70)
 
-# 1. SELECAO DOS ATRIBUTOS PARA AGRUPAMENTO
-print("1. SELECAO DOS ATRIBUTOS PARA AGRUPAMENTO")
-
-# Atributos COMPORTAMENTAIS do usuario
+# Feature Engineering: Atributos comportamentais do usuario
+# Calcula média, desvio e quantidade de avaliações por usuário
 perfil = avaliacoes.groupby("userId").agg(
     media_nota=("rating", "mean"),
     desvio_nota=("rating", "std"),
@@ -143,140 +150,354 @@ perfil = avaliacoes.groupby("userId").agg(
 )
 perfil["desvio_nota"] = perfil["desvio_nota"].fillna(0)
 
-# Atributos de PREFERENCIA por genero (% das avaliacoes do usuario em cada genero)
+# Feature Engineering: Preferencia por genero
+# Expande gêneros e calcula proporção de avaliações por gênero por usuário
+filmes["genres_list"] = filmes["genres"].str.split("|")
 av_com_generos = (avaliacoes.merge(filmes[["movieId", "genres_list"]],
-                                   on="movieId")
-                            .explode("genres_list"))
+                    on="movieId")
+                .explode("genres_list"))
 
 generos_pct = (av_com_generos.groupby(["userId", "genres_list"]).size()
                .unstack(fill_value=0))
 generos_pct = generos_pct.div(generos_pct.sum(axis=1), axis=0)
 
-# Combina os dois grupos de atributos em um unico vetor por usuario
+# Combine attributes
+# Junta comportamento e preferências de gênero em um único vetor por usuário
 perfil_usuario = perfil.join(generos_pct, how="left").fillna(0)
 
-print("Atributos selecionados para cada usuario:")
-print(perfil_usuario.head())
-print(f"\nTotal de usuarios: {perfil_usuario.shape[0]}")
-print(f"Total de atributos por usuario: {perfil_usuario.shape[1]}")
+# Descrição dos atributos
+print(f"Users: {perfil_usuario.shape[0]}, features: {perfil_usuario.shape[1]}")
 
-# 2. JUSTIFICATIVA DOS ATRIBUTOS ESCOLHIDOS
-#  media_nota: identifica usuarios 'generosos' x 'criticos'.
-#  desvio_nota: identifica usuarios 'estaveis' x 'ecleticos'.
-#  qtd_avaliacoes: separa usuarios casuais dos engajados.
-#  % de cada genero: representa a PREFERENCIA do usuario por conteudo,
-#                     conectando o agrupamento ao tema central do projeto
-#                     (recomendacao de filmes).
 
-# Combinamos atributos COMPORTAMENTAIS (como o usuario avalia) com
-# atributos de CONTEUDO (o que ele gosta de assistir), formando um
-# vetor de preferencias
+# ============================================================================
+# NORMALIZAÇÃO - StandardScaler (z-score)
+# ============================================================================
+print("="*70)
+print("NORMALIZAÇÃO DOS DADOS")
+print("="*70)
 
-# 3. NORMALIZACAO / PADRONIZACAO
-# Justificativa: 'qtd_avaliacoes' pode chegar a 300+ enquanto 
-# 'media_nota'vai ate 5 e os '%generos' vao ate 1. Sem padronizar, qtd_avaliacoes dominaria a distancia euclidiana. 
-# StandardScaler deixa todas as colunas com media 0 e desvio 1.
 scaler = StandardScaler()
 X = scaler.fit_transform(perfil_usuario)
 
-print("Estatisticas APOS padronizacao (media ~ 0, desvio ~ 1):")
-print(pd.DataFrame(X, columns=perfil_usuario.columns)
-      .describe().round(2).loc[["mean", "std"]])
+# Normalização: StandardScaler (Z-score) aplicada
+# (saída reduzida para ser concisa)
+stats = pd.DataFrame(X, columns=perfil_usuario.columns).describe().loc[["mean", "std"]]
+print(f"Media/desvio (exemplos) after scaling: media_nota={stats.at['mean','media_nota']:.3f}, std={stats.at['std','media_nota']:.3f}")
 
-# 4. MEDIDA DE DISTANCIA / SIMILARIDADE
-# Medida adotada: DISTANCIA EUCLIDIANA
-# Justificativa:
-# - E a metrica padrao do K-Means.
-# - Apropriada para atributos numericos continuos.
-# - Funciona bem apos a padronizacao (todas as dimensoes na mesma escala).
+# ============================================================================
+# AGRUPAMENTO - K-Means
+# Agrupa usuários por similaridade no espaço padronizado de features
+# ============================================================================
+# Avaliação K=2..10 (sem impressões detalhadas)# Testa diferentes valores de K e calcula Davies-Bouldin para cada um
 
-# 5. APLICACAO DO PRIMEIRO ALGORITMO DE AGRUPAMENTO (K-MEANS)
-inercias    = []
-silhouettes = []
+db_indices = []
 ks = range(2, 11)
 for k in ks:
-    km = KMeans(n_clusters=k, random_state=42, n_init=10)
-    rotulos = km.fit_predict(X)
-    inercias.append(km.inertia_)
-    silhouettes.append(silhouette_score(X, rotulos))
-    print(f"  k={k} | inercia={km.inertia_:8.2f} | "
-          f"silhouette={silhouettes[-1]:.3f}")
+        km = KMeans(n_clusters=k, random_state=42, n_init=10)
+        rotulos = km.fit_predict(X)
+        db = davies_bouldin_score(X, rotulos)
+        db_indices.append(db)
 
-K_IDEAL = 4   # ajuste apos analisar o grafico do cotovelo
-print(f"\nValor de k escolhido: {K_IDEAL}")
-
+# Clustering final com k=4
+K_IDEAL = 4
 kmeans = KMeans(n_clusters=K_IDEAL, random_state=42, n_init=10)
 perfil_usuario["cluster"] = kmeans.fit_predict(X)
+print(f"K escolhido: {K_IDEAL}")
 
-# 6. VISUALIZACAO DOS DADOS
-# Reduz para 2D (apenas para conseguir plotar) usando PCA
-X_2d = PCA(n_components=2, random_state=42).fit_transform(X)
+# PCA 2D para visualizacao (projecao dos 27D em 2D)
+pca = PCA(n_components=2, random_state=42)
+X_2d = pca.fit_transform(X)
+var_pc1 = pca.explained_variance_ratio_[0] * 100
+var_pc2 = pca.explained_variance_ratio_[1] * 100
 
-fig, axes = plt.subplots(1, 2, figsize=(14, 5))
-
-# Grafico A: metodo do cotovelo
-axes[0].plot(list(ks), inercias, marker="o")
-axes[0].set_xlabel("Numero de clusters (k)")
-axes[0].set_ylabel("Inercia")
-axes[0].set_title("Metodo do Cotovelo")
-axes[0].grid(True)
-
-# Grafico B: clusters em 2D
-sc = axes[1].scatter(X_2d[:, 0], X_2d[:, 1],
-                     c=perfil_usuario["cluster"], cmap="tab10", s=30)
-axes[1].set_xlabel("Componente Principal 1")
-axes[1].set_ylabel("Componente Principal 2")
-axes[1].set_title(f"Clusters de Usuarios (k={K_IDEAL})")
-plt.colorbar(sc, ax=axes[1], label="Cluster")
-
-plt.tight_layout()
+plt.figure(figsize=(10, 7))
+plt.scatter(X_2d[:, 0], X_2d[:, 1],
+            c=perfil_usuario["cluster"], cmap="tab10", s=50, alpha=0.7)
+plt.xlabel(f"Componente Principal 1 ({var_pc1:.1f}% da informacao)", fontsize=12)
+plt.ylabel(f"Componente Principal 2 ({var_pc2:.1f}% da informacao)", fontsize=12)
+plt.title(f"Clusters de Usuarios (k={K_IDEAL})", fontsize=14)
+plt.colorbar(label="Cluster")
+# Salva grafico em arquivo
 plt.savefig("clusters_usuarios.png", dpi=100)
-plt.show()
+plt.close()
 print("Grafico salvo em: clusters_usuarios.png")
 
-# 7. ANALISE INICIAL DOS CLUSTERS
+# ============================================================================
+# ANÁLISE E INTERPRETAÇÃO DOS CLUSTERS
+# ============================================================================
+print("\n" + "="*70)
+print("ANÁLISE E INTERPRETAÇÃO DOS CLUSTERS")
+print("="*70)
 
-print("\nTamanho de cada cluster:")
-print(perfil_usuario["cluster"].value_counts().sort_index())
+print("\nDistribuicao dos usuarios por cluster:")
+tamanhos = perfil_usuario["cluster"].value_counts().sort_index()
+for c, size in tamanhos.items():
+    pct = (size / len(perfil_usuario)) * 100
+    print(f"  Cluster {c}: {size:5d} usuários ({pct:5.1f}%)")
 
-print("\nMedia dos atributos COMPORTAMENTAIS em cada cluster:")
-print(perfil_usuario.groupby("cluster")[
+# Media dos 3 atributos comportamentais por cluster
+print("\nCaracteristicas comportamentais por cluster:")
+comportamento = perfil_usuario.groupby("cluster")[
     ["media_nota", "desvio_nota", "qtd_avaliacoes"]
-].mean().round(2))
+].mean()
+print(comportamento.round(2).to_string())
 
-print("\nTOP 3 generos preferidos em cada cluster:")
+# Top 5 generos por cluster
+print("\nPreferencias de genero por cluster:")
 colunas_genero = generos_pct.columns
 for c in sorted(perfil_usuario["cluster"].unique()):
     medias_genero = (perfil_usuario[perfil_usuario["cluster"] == c]
                      [colunas_genero].mean()
-                     .sort_values(ascending=False).head(3))
-    print(f"\nCluster {c}:")
-    print(medias_genero.round(3).to_string())
+                     .sort_values(ascending=False).head(5))
+    print(f"\nCluster {c} - TOP 5 gêneros:")
+    for gen, val in medias_genero.items():
+        print(f"  {gen:15s}: {val:.1%}")
 
-
-# 8. IDENTIFICACAO DE PROBLEMAS NO AGRUPAMENTO INICIAL
+# Calcula metricas de qualidade (balanceamento e separacao)
 tamanhos = perfil_usuario["cluster"].value_counts()
 razao = tamanhos.max() / tamanhos.min()
-sil_final = silhouette_score(X, perfil_usuario["cluster"])
+db_final = davies_bouldin_score(X, perfil_usuario["cluster"])
 
-print(f"\n[1] Balanceamento dos clusters")
-print(f"Maior cluster: {tamanhos.max()} usuarios")
-print(f"Menor cluster: {tamanhos.min()} usuarios")
-print(f"Razao maior/menor: {razao:.2f}x")
-if razao > 5:
-    print("PROBLEMA: clusters muito desbalanceados.")
+# Avalia qualidade do agrupamento
+print("\nQUALIDADE DO AGRUPAMENTO")
 
-print(f"\n[2] Qualidade do agrupamento")
-print(f"Silhouette Score final (k={K_IDEAL}): {sil_final:.3f}")
-if sil_final < 0.25:
-    print("PROBLEMA: silhouette baixo -> clusters pouco definidos.")
-elif sil_final < 0.5:
-    print("ATENCAO: silhouette razoavel, com sobreposicao parcial.")
+print(f"Balanceamento:")
+print(f"  Maior cluster: {tamanhos.max()} usuarios")
+print(f"  Menor cluster: {tamanhos.min()} usuarios")
+print(f"  Razao maior/menor: {razao:.2f}x")
+# Davies-Bouldin: quanto menor, melhor (< 1.5 eh bom)
+print(f"Davies-Bouldin Index final (k={K_IDEAL}): {db_final:.3f}")
+
+# Aplicação de um segundo algoritmo de agrupamento.
+# Comparação entre os algoritmos.
+# Uso de pelo menos duas métricas de avaliação.
+# Análise dos parâmetros utilizados.
+# Interpretação dos clusters.
+# Nomeação dos perfis encontrados.
+# Definição de como os clusters serão usados na Inteligência Computacional.
+# Geração da variável ou estrutura de saída do agrupamento.
+# Produto esperado: Etapa de Agrupamento de Dados consolidada, com clusters interpretados e prontos para alimentar a
+# etapa de Inteligência Computacional.
+
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.metrics import (silhouette_score, davies_bouldin_score,
+                             calinski_harabasz_score, adjusted_rand_score)
+from scipy.cluster.hierarchy import dendrogram, linkage
+
+# Guarda o resultado do K-Means (Semana 2) para nao sobrescrever
+perfil_usuario["cluster_kmeans"] = perfil_usuario["cluster"]
+
+
+# -----------------------------------------------------------------------------
+# 1. APLICACAO DE UM SEGUNDO ALGORITMO DE AGRUPAMENTO (HIERARQUICO)
+# -----------------------------------------------------------------------------
+
+print("\n\n1. SEGUNDO ALGORITMO: AGRUPAMENTO HIERARQUICO")
+
+# Usamos o MESMO numero de clusters do K-Means para uma comparacao justa.
+hier = AgglomerativeClustering(n_clusters=K_IDEAL, linkage="ward")
+perfil_usuario["cluster_hier"] = hier.fit_predict(X)
+
+print(f"Algoritmo aplicado com k={K_IDEAL} e linkage='ward'.")
+print("Distribuicao dos usuarios (Hierarquico):")
+print(perfil_usuario["cluster_hier"].value_counts().sort_index().to_string())
+
+
+# -----------------------------------------------------------------------------
+# 4. ANALISE DOS PARAMETROS UTILIZADOS
+#    (colocada aqui porque justifica as escolhas de cada algoritmo)
+# -----------------------------------------------------------------------------
+print("\n4. ANALISE DOS PARAMETROS")
+
+# 4.1 Escolha do linkage no Hierarquico (testamos 3 opcoes)
+print("\n[Hierarquico] Comparacao de metodos de linkage (k fixo):")
+for metodo in ["ward", "complete", "average"]:
+    rot = AgglomerativeClustering(n_clusters=K_IDEAL, linkage=metodo).fit_predict(X)
+    sil = silhouette_score(X, rot)
+    db  = davies_bouldin_score(X, rot)
+    print(f"  linkage={metodo:9s} | silhouette={sil:.3f} | davies_bouldin={db:.3f}")
+print("Escolhido 'ward': minimiza a variancia interna dos clusters.")
+
+# 4.2 Reavaliacao do k para os DOIS algoritmos (justifica k escolhido)
+print(f"\n[Ambos] Metricas variando k (justificativa do k={K_IDEAL}):")
+print(f"  {'k':>2} | {'KMeans_sil':>10} | {'Hier_sil':>9} | {'KMeans_DB':>9} | {'Hier_DB':>8}")
+for k in range(2, 9):
+    km_r = KMeans(n_clusters=k, random_state=42, n_init=10).fit_predict(X)
+    hi_r = AgglomerativeClustering(n_clusters=k, linkage="ward").fit_predict(X)
+    print(f"  {k:>2} | {silhouette_score(X, km_r):>10.3f} | "
+          f"{silhouette_score(X, hi_r):>9.3f} | "
+          f"{davies_bouldin_score(X, km_r):>9.3f} | "
+          f"{davies_bouldin_score(X, hi_r):>8.3f}")
+
+print("\nParametros finais documentados:")
+print(f"K-Means - n_clusters={K_IDEAL}, init='k-means++', n_init=10, random_state=42")
+print(f"Hierarquico - n_clusters={K_IDEAL}, linkage='ward', metric='euclidean'")
+
+
+# -----------------------------------------------------------------------------
+# 3. USO DE PELO MENOS DUAS METRICAS DE AVALIACAO
+# -----------------------------------------------------------------------------
+print("\n\n3. METRICAS DE AVALIACAO (3 metricas)")
+
+def avaliar(X, labels):
+    """Calcula 3 metricas internas de qualidade do agrupamento."""
+    return {
+        "silhouette": silhouette_score(X, labels), # maior = melhor (-1 a 1)
+        "calinski_harabasz": calinski_harabasz_score(X, labels), # maior = melhor
+        "davies_bouldin": davies_bouldin_score(X, labels), # menor = melhor
+    }
+
+metricas_kmeans = avaliar(X, perfil_usuario["cluster_kmeans"])
+metricas_hier   = avaliar(X, perfil_usuario["cluster_hier"])
+
+print(f"{'Metrica':>20} | {'K-Means':>10} | {'Hierarquico':>12} | melhor")
+print("-" * 60)
+for m in metricas_kmeans:
+    v_km, v_hi = metricas_kmeans[m], metricas_hier[m]
+    if m == "davies_bouldin":   # menor e melhor
+        melhor = "K-Means" if v_km < v_hi else "Hierarquico"
+    else:                        # maior e melhor
+        melhor = "K-Means" if v_km > v_hi else "Hierarquico"
+    print(f"{m:>20} | {v_km:>10.3f} | {v_hi:>12.3f} | {melhor}")
+
+
+# -----------------------------------------------------------------------------
+# 2. COMPARACAO ENTRE OS ALGORITMOS
+# -----------------------------------------------------------------------------
+print("\n\n2. COMPARACAO ENTRE OS ALGORITMOS")
+
+# 2.1 Concordancia entre os dois agrupamentos
+# ARI ~1 = agrupamentos quase iguais; ~0 = concordancia aleatoria
+ari = adjusted_rand_score(perfil_usuario["cluster_kmeans"],
+                          perfil_usuario["cluster_hier"])
+print(f"\nAdjusted Rand Index (concordancia entre os 2): {ari:.3f}")
+if ari > 0.7:
+    print("Alta concordancia: os algoritmos encontram estrutura parecida.")
+elif ari > 0.4:
+    print("Concordancia moderada: estrutura parecida, mas com divergencias.")
 else:
-    print("OK: silhouette indica clusters bem separados.")
+    print("Baixa concordancia: os algoritmos enxergam grupos diferentes.")
 
-print("\n[3] Limitacoes do K-Means observadas")
-print("- Assume clusters esfericos e de tamanho similar.")
-print("- Sensivel a outliers (usuarios extremos distorcem o centroide).")
-print("- O valor de k foi escolhido visualmente (nao garante otimo).")
-print("- Inicializacao aleatoria afeta resultado (mitigado com n_init=10).")
+# 2.3 Visualizacao lado a lado (mesma projecao PCA, cores diferentes)
+fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+axes[0].scatter(X_2d[:, 0], X_2d[:, 1],
+                c=perfil_usuario["cluster_kmeans"], cmap="tab10", s=40, alpha=0.7)
+axes[0].set_title("K-Means")
+axes[1].scatter(X_2d[:, 0], X_2d[:, 1],
+                c=perfil_usuario["cluster_hier"], cmap="tab10", s=40, alpha=0.7)
+axes[1].set_title("Hierarquico (Ward)")
+for ax in axes:
+    ax.set_xlabel("Componente Principal 1")
+    ax.set_ylabel("Componente Principal 2")
+plt.suptitle("Comparacao dos Agrupamentos (projecao PCA 2D)")
+plt.tight_layout()
+plt.savefig("comparacao_algoritmos.png", dpi=100)
+plt.close()
+print("\nGrafico salvo em: comparacao_algoritmos.png")
+
+# 2.4 Dendrograma (visualizacao exclusiva do hierarquico)
+plt.figure(figsize=(12, 6))
+Z = linkage(X, method="ward")
+dendrogram(Z, truncate_mode="level", p=4)
+plt.title("Dendrograma - Agrupamento Hierarquico (Ward)")
+plt.xlabel("Usuarios (agrupados)")
+plt.ylabel("Distancia")
+plt.tight_layout()
+plt.savefig("dendrograma.png", dpi=100)
+plt.close()
+print("Grafico salvo em: dendrograma.png")
+
+# 2.5 ESCOLHA DO ALGORITMO FINAL (baseado na maioria das metricas)
+votos_km = sum([metricas_kmeans["silhouette"] > metricas_hier["silhouette"],
+                metricas_kmeans["calinski_harabasz"] > metricas_hier["calinski_harabasz"],
+                metricas_kmeans["davies_bouldin"] < metricas_hier["davies_bouldin"]])
+ALGO_FINAL = "K-Means" if votos_km >= 2 else "Hierarquico"
+coluna_final = "cluster_kmeans" if ALGO_FINAL == "K-Means" else "cluster_hier"
+perfil_usuario["cluster_final"] = perfil_usuario[coluna_final]
+print(f"\nALGORITMO ESCOLHIDO: {ALGO_FINAL} "
+      f"(venceu em {max(votos_km, 3 - votos_km)} de 3 metricas)")
+
+
+# -----------------------------------------------------------------------------
+# 5. INTERPRETACAO DOS CLUSTERS  +  6. NOMEACAO DOS PERFIS
+# -----------------------------------------------------------------------------
+print("\n5 e 6. INTERPRETACAO E NOMEACAO DOS PERFIS")
+colunas_genero = generos_pct.columns
+media_global = perfil_usuario["media_nota"].mean()
+qtd_global   = perfil_usuario["qtd_avaliacoes"].mean()
+
+def classificar_engajamento(qtd):
+    if qtd > 1.3 * qtd_global: return "Engajado"
+    if qtd < 0.7 * qtd_global: return "Casual"
+    return "Moderado"
+
+def classificar_tendencia(media):
+    if media > media_global + 0.15: return "Generoso"
+    if media < media_global - 0.15: return "Critico"
+    return "Equilibrado"
+
+nomes_perfis = {}
+for c in sorted(perfil_usuario["cluster_final"].unique()):
+    grupo = perfil_usuario[perfil_usuario["cluster_final"] == c]
+    media_c = grupo["media_nota"].mean()
+    qtd_c   = grupo["qtd_avaliacoes"].mean()
+    genero_top = grupo[colunas_genero].mean().idxmax()
+
+    eng  = classificar_engajamento(qtd_c)
+    tend = classificar_tendencia(media_c)
+    nome = f"{eng} {tend} - fa de {genero_top}"
+    nomes_perfis[c] = nome
+
+    print(f"\n--- CLUSTER {c}: \"{nome}\" ---")
+    print(f"  Tamanho            : {len(grupo)} usuarios "
+          f"({len(grupo)/len(perfil_usuario)*100:.1f}%)")
+    print(f"  Media de nota      : {media_c:.2f} (global: {media_global:.2f})")
+    print(f"  Avaliacoes/usuario : {qtd_c:.0f} (global: {qtd_global:.0f})")
+    print(f"  Genero dominante   : {genero_top}")
+    top3 = grupo[colunas_genero].mean().sort_values(ascending=False).head(3)
+    print(f"  Top 3 generos      : "
+          + ", ".join([f"{g} ({v:.1%})" for g, v in top3.items()]))
+
+# Aplica o nome do perfil a cada usuario
+perfil_usuario["perfil_nome"] = perfil_usuario["cluster_final"].map(nomes_perfis)
+
+
+# -----------------------------------------------------------------------------
+# 7. COMO OS CLUSTERS SERAO USADOS NA INTELIGENCIA COMPUTACIONAL
+# -----------------------------------------------------------------------------
+# (a) ALVO DE CLASSIFICACAO:
+#     Um modelo de IC aprende a prever o cluster de um usuario NOVO a partir das primeiras avaliacoes dele.
+#     Assim, mesmo sem historico, o usuario ja entra em um grupo de preferencia.
+
+# (b) FILTRO PARA RECOMENDACAO:
+#     Conhecido o cluster do usuario, recomendam-se os filmes mais bem avaliados
+#     DENTRO daquele cluster (filtragem colaborativa baseada em grupos).
+
+# (c) ATRIBUTO DE ENTRADA (feature):
+#     O 'perfil_nome' / cluster vira uma variavel categorica de entrada para
+#     modelos futuros de previsao de nota ou ranking de filmes.
+
+
+# -----------------------------------------------------------------------------
+# 8. GERACAO DA ESTRUTURA DE SAIDA DO AGRUPAMENTO
+# -----------------------------------------------------------------------------
+print("\n8. ESTRUTURA DE SAIDA (arquivos que alimentam a IC)")
+
+# 8.1 Saida principal: cada usuario com seu cluster e perfil
+saida_usuarios = (perfil_usuario.reset_index()
+                  [["userId", "media_nota", "desvio_nota", "qtd_avaliacoes",
+                    "cluster_final", "perfil_nome"]])
+saida_usuarios.to_csv("usuarios_clusterizados.csv", index=False)
+print(f"usuarios_clusterizados.csv ({len(saida_usuarios)} usuarios)")
+
+# 8.2 Resumo dos perfis (1 linha por cluster)
+resumo_perfis = (perfil_usuario.groupby(["cluster_final", "perfil_nome"])
+                 .agg(qtd_usuarios=("media_nota", "size"),
+                      media_nota=("media_nota", "mean"),
+                      media_avaliacoes=("qtd_avaliacoes", "mean"))
+                 .round(2).reset_index())
+resumo_perfis.to_csv("perfis_clusters.csv", index=False)
+print(f"perfis_clusters.csv({len(resumo_perfis)} perfis)")
+
+print("\nPreview da saida principal:")
+print(saida_usuarios.head().to_string(index=False))
